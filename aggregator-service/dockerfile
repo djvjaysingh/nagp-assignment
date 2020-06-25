@@ -1,0 +1,8 @@
+FROM openjdk:8
+
+ADD target/aggregator-service.jar aggregator-service.jar
+
+
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","aggregator-service.jar"]

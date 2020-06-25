@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nagp-service-app-config
+data:
+  MYSQL_HOST_NAME: mysql-db
+  MYSQL_DATABASE_NAME: userdb
+  JAEGER_HOST: jaeger-agent
+  USER_SERVICE_URL: http://user-service
+  ORDERS_SERVICE_URL: http://orders-service

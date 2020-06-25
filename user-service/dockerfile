@@ -1,0 +1,8 @@
+FROM openjdk:8
+
+ADD target/user-service.jar user-service.jar
+
+
+EXPOSE 8090
+
+ENTRYPOINT ["java","-jar","user-service.jar"]

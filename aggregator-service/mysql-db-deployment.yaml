@@ -1,0 +1,75 @@
+# Define a Service to Expose mysql to Other Services within Cluster
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: mysql-db  # DNS name
+    labels:
+      app: mysql-db
+      tier: database
+  spec:
+    ports: 
+      - port: 3306
+        targetPort: 3306
+        protocol: TCP
+    clusterIP: None   # We use DNS, Thus ClusterIp is not required
+    selector:         
+      app: mysql-db   # mysql Pod should contain same labels
+      tier: database
+# Define a Deployment to Configure mysql server
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: mysql-db-deployment
+    labels:
+      app: mysql-db
+      tier: database
+  spec:
+    replicas: 1
+    selector:   
+      matchLabels: 
+        app: mysql-db   # user-service Pod should contain same labels
+        tier: database
+    template:
+      metadata:
+        labels: 
+          app: mysql-db
+          tier: database
+      spec:
+          containers:
+            - name: mysql-db
+              image: mysql:8 # image from docker-hub
+              args:
+                - "--default-authentication-plugin=mysql_native_password"
+              env: # Setting Environment Variables
+                - name: MYSQL_ROOT_PASSWORD  # Setting Root Password of mysql from a 'Secret'
+                  valueFrom:
+                    secretKeyRef: 
+                      name: nagp-service-app-secret  # Secret Name
+                      key: MYSQL_ROOT_PASSWORD
+                - name: MYSQL_USER # Setting User Username on mysql from a 'Secret'
+                  valueFrom: 
+                    secretKeyRef: 
+                      name: nagp-service-app-secret  # Secret Name
+                      key: MYSQL_USER_NAME
+                - name: MYSQL_PASSWORD  # Setting User Password on mysql from a 'Secret'
+                  valueFrom:
+                    secretKeyRef: 
+                      name: nagp-service-app-secret  # Secret Name
+                      key: MYSQL_PASSWORD
+                - name: MYSQL_DATABASE # Setting Database name on mysql from a 'ConfigMap'
+                  valueFrom:
+                    configMapKeyRef:
+                      name: nagp-service-app-config  # ConfigMap Name
+                      key: MYSQL_DATABASE_NAME
+              ports: 
+                - containerPort: 3306
+              volumeMounts:
+                - name: mysql-db-persistent-storage
+                  mountPath: /var/lib/mysql
+          volumes: 
+            - name: mysql-db-persistent-storage
+              persistentVolumeClaim: 
+                claimName: mysql-db-volumneclaim

@@ -1,0 +1,14 @@
+# Define a Persistent Volume Claim (PVC) for MYSQL Storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: 
+ name: mysql-db-volumneclaim  # Name of PVC for identifying the storage data
+ labels: 
+  app: mysql
+  tier: database
+spec:
+ accessModes: 
+  - ReadWriteOnce
+ resources:
+  requests:
+   storage: 10Gi  # Size of the persistent Volume we are trying to claim
